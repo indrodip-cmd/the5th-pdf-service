@@ -325,22 +325,30 @@ class PDFRequest(BaseModel):
     roadmap: str
 
 TESTIMONIALS = [
-    dict(name='Laurie Gerber', role='Online Course Creator',
-         result='$26,000 in 3 months',
-         quote='We repositioned my pricing from $79 to $225 and within three months generated $26,000 in revenue.',
-         img_url='https://quiz.the5th.consulting/testimonials/laurie.jpg'),
-    dict(name='Abbas Jamie', role='Author and Speaker',
-         result='Amazon Bestseller in 1 month',
-         quote='Within one month I became an Amazon bestselling author. The result spoke for itself.',
-         img_url=None),
-    dict(name='Jeanne Tomasak', role='Business Coach',
-         result='First client in 6 weeks',
-         quote='I had spent over $10,000 on coaches before. None gave me the clarity Indrodip did.',
-         img_url=None),
-    dict(name='Angela Gregg', role='Education Program Director',
-         result='First $2,500 sale',
-         quote='After burning through $25,000 on coaches, two months with Indrodip and I closed my first $2,500 sale.',
-         img_url=None),
+    dict(
+        name='Laurie Gerber',
+        role='Online Course Creator',
+        result='$26,000 in 3 months',
+        quote='After a failed launch I had lost confidence completely. We rebuilt the strategy, repositioned my pricing from $79 to $225, and within three months generated $26,000 in revenue. I still find that number hard to believe.',
+    ),
+    dict(
+        name='Abbas Jamie',
+        role='Author and Speaker',
+        result='Amazon Bestseller in 1 month',
+        quote='I had spoken to multiple agencies before finding Indrodip. None delivered. Within one month I became an Amazon bestselling author. The result spoke for itself.',
+    ),
+    dict(
+        name='Jeanne Tomasak',
+        role='Business Coach',
+        result='First client in 6 weeks',
+        quote='I had spent over $10,000 on coaches before working with Indrodip. None gave me the clarity he did. He rebuilt how I saw my business from niche to offer to sales conversation. Six weeks later I closed my first client.',
+    ),
+    dict(
+        name='Angela Gregg',
+        role='Education Program Director',
+        result='First $2,500 sale',
+        quote='After burning through $25,000 on coaches who did not understand my context, two months with Indrodip and I closed my first $2,500 sale. For someone who had nearly given up, that meant everything.',
+    ),
 ]
 
 @app.post('/generate-pdf')
@@ -453,6 +461,7 @@ async def generate_pdf(req: PDFRequest):
     story.append(P('WHAT OUR CLIENTS SAY', 'sec_label'))
     story.append(sp(4))
     half = (CW - 3*mm) / 2
+
     for i in range(0, len(TESTIMONIALS), 2):
         row = []
         for j in range(2):
@@ -462,15 +471,36 @@ async def generate_pdf(req: PDFRequest):
                 continue
             t = TESTIMONIALS[idx]
             cell = []
-            cell.append(Paragraph('<font color="#1d5c3a" size="16"><b>“</b></font>', S['body']))
-            cell.append(sp(1))
-            cell.append(P(t['quote'], 'quote'))
-            cell.append(sp(3))
-            cell.append(P(t['name'], 'tname'))
-            cell.append(P(t['role'], 'trole'))
-            cell.append(sp(1))
-            cell.append(P(t['result'], 'tbadge'))
+            cell.append(Paragraph(
+                '<font color=”#1d5c3a” size=”18”><b>“</b></font>',
+                S['body']))
+            cell.append(sp(2))
+            cell.append(Paragraph(t['quote'], S['quote']))
+            cell.append(sp(4))
+            name_data = [[
+                [
+                    Paragraph(t['name'], S['tname']),
+                    Paragraph(t['role'], S['trole']),
+                ],
+                Paragraph(t['result'], ParagraphStyle(
+                    'res', fontName='Helvetica-Bold', fontSize=7.5,
+                    textColor=GREEN, leading=11,
+                    backColor=GREEN_PALE,
+                    borderPadding=(3, 6, 3, 6)
+                )),
+            ]]
+            name_t = Table(name_data, colWidths=[half*0.6, half*0.35])
+            name_t.setStyle(TableStyle([
+                ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+                ('LEFTPADDING', (0,0), (-1,-1), 0),
+                ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                ('TOPPADDING', (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+                ('ALIGN', (1,0), (1,0), 'RIGHT'),
+            ]))
+            cell.append(name_t)
             row.append(cell)
+
         rt = Table([row], colWidths=[half, half])
         rt.setStyle(TableStyle([
             ('BACKGROUND', (0,0), (-1,-1), WHITE),
@@ -513,6 +543,73 @@ async def generate_pdf(req: PDFRequest):
         ('LINEABOVE', (0,0), (-1,0), 2, GREEN),
     ]))
     story.append(cta_t)
+
+    story.append(sp(8))
+
+    # About section
+    about_content = [
+        sp(2),
+        Paragraph('ABOUT INDRODIP GHOSH', S['sec_label']),
+        sp(4),
+        Paragraph('Founder, The5th Consulting', ParagraphStyle(
+            'about_role', fontName='Helvetica-Bold', fontSize=11,
+            textColor=BLACK, leading=16)),
+        sp(3),
+        Paragraph(
+            'Indrodip Ghosh is the founder of The5th Consulting, a digital coaching business '
+            'helping women over 40 monetize their life experience and expertise into consistent '
+            'digital income. His flagship methodology, the Client-To-Cash Method, has helped '
+            'hundreds of coaches, consultants, and experts package their knowledge into '
+            'high-ticket offers and build predictable revenue.',
+            S['body']
+        ),
+        sp(3),
+        Paragraph(
+            'Before founding The5th, Indrodip spent years in the coaching and consulting industry, '
+            'studying what separates coaches who struggle from those who build sustainable businesses. '
+            'The answer was never about talent. It was always about positioning, offer clarity, '
+            'and the courage to charge what their expertise is worth.',
+            S['body']
+        ),
+        sp(4),
+        HLine(color=GREEN, thickness=0.5),
+        sp(4),
+        Paragraph('THE5TH CONSULTING', S['sec_label']),
+        sp(3),
+        Table([[
+            [
+                Paragraph('10K Roadmap Accelerator', ParagraphStyle(
+                    'prod', fontName='Helvetica-Bold', fontSize=9,
+                    textColor=BLACK, leading=13)),
+                sp(1),
+                Paragraph('Flagship 1:1 high-ticket coaching program for coaches and consultants ready to build a $10K/month business.', S['body_sm']),
+            ],
+            [
+                Paragraph('The5th Community', ParagraphStyle(
+                    'prod2', fontName='Helvetica-Bold', fontSize=9,
+                    textColor=BLACK, leading=13)),
+                sp(1),
+                Paragraph('Monthly membership with live coaching calls, resources, and a community of women building digital income.', S['body_sm']),
+            ],
+        ]], colWidths=[CW/2 - 3*mm, CW/2 - 3*mm]),
+        sp(4),
+        Paragraph(
+            'quiz.the5th.consulting  |  support@10kroadmap.org  |  whop.com/joined/10kroadmap-org/',
+            S['footer_txt']
+        ),
+        sp(2),
+    ]
+
+    about_t = Table([[about_content]], colWidths=[CW])
+    about_t.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor('#f8f7f4')),
+        ('LEFTPADDING', (0,0), (-1,-1), 8*mm),
+        ('RIGHTPADDING', (0,0), (-1,-1), 8*mm),
+        ('TOPPADDING', (0,0), (-1,-1), 8*mm),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8*mm),
+        ('LINEABOVE', (0,0), (-1,0), 2, GREEN),
+    ]))
+    story.append(about_t)
 
     # Build doc
     first_name = req.name.split()[0] if req.name else 'there'
