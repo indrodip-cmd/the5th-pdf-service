@@ -478,7 +478,7 @@ async def generate_pdf(req: PDFRequest):
             t = TESTIMONIALS[idx]
             cell = []
             cell.append(Paragraph(
-                '<font color=”#1d5c3a” size=”18”><b>“</b></font>',
+                '<font color="#1d5c3a" size="18"><b>&#8220;</b></font>',
                 S['body']))
             cell.append(sp(2))
             cell.append(Paragraph(t['quote'], S['quote']))
