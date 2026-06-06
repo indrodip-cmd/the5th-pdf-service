@@ -24,11 +24,12 @@ GREY_500   = colors.HexColor('#6b6b6b')
 GREY_300   = colors.HexColor('#c8c8c8')
 GREY_100   = colors.HexColor('#f6f6f4')
 WHITE      = colors.white
-GREEN      = colors.HexColor('#1d5c3a')
-GREEN_MID  = colors.HexColor('#2d7a52')
+GREEN      = colors.HexColor('#1c4a32')
+GREEN_MID  = colors.HexColor('#2d6a4f')
 GREEN_PALE = colors.HexColor('#eaf4ee')
-GOLD       = colors.HexColor('#9a7a1a')
+GOLD       = colors.HexColor('#b8920a')
 GOLD_PALE  = colors.HexColor('#faf6ec')
+PURPLE     = colors.HexColor('#8b7fcf')
 
 PAGE_W, PAGE_H = A4
 ML = 20*mm; MR = 20*mm; MT = 14*mm; MB = 16*mm
@@ -162,7 +163,7 @@ class LeftAccentBox(Flowable):
         if self._table:
             self._table.drawOn(c, 3*mm, 0)
 
-def draw_cover(canv, page_w, page_h, lead_name, stage, goal, hours):
+def draw_cover(canv, page_w, page_h, lead_name, stage, goal, hours, archetype='The Pioneer', personality='The Driver'):
     canv.saveState()
     canv.setFillColor(colors.HexColor('#060a07'))
     canv.rect(0, 0, page_w, page_h, fill=1, stroke=0)
@@ -212,10 +213,13 @@ def draw_cover(canv, page_w, page_h, lead_name, stage, goal, hours):
     canv.drawString(ML, text_y_start, 'YOUR PERSONALISED BLUEPRINT')
     canv.setFillColor(WHITE)
     canv.setFont('Helvetica-Bold', 32)
-    canv.drawString(ML, text_y_start - 14*mm, f'{lead_name}, here is your')
+    canv.drawString(ML, text_y_start - 14*mm, f'{lead_name}, you are')
     canv.setFillColor(colors.HexColor('#3a9a64'))
     canv.setFont('Helvetica-Oblique', 32)
-    canv.drawString(ML, text_y_start - 26*mm, 'personalised blueprint.')
+    canv.drawString(ML, text_y_start - 26*mm, f'{archetype}.')
+    canv.setFillColor(colors.HexColor('#8b7fcf'))
+    canv.setFont('Helvetica-Bold', 9)
+    canv.drawString(ML, text_y_start - 32*mm, f'PERSONALITY TYPE: {personality.upper()}')
     canv.setStrokeColor(colors.HexColor('#1d5c3a'))
     canv.setLineWidth(0.5)
     canv.line(ML, text_y_start - 30*mm, ML + 80*mm, text_y_start - 30*mm)
@@ -226,7 +230,7 @@ def draw_cover(canv, page_w, page_h, lead_name, stage, goal, hours):
     canv.drawString(ML, text_y_start - 43*mm,
                     'where you are and the fastest path to your income goal.')
     stat_y = text_y_start - 60*mm
-    stats = [('STAGE', stage.title()), ('6-MONTH GOAL', goal), ('HOURS / WEEK', f'{hours} hrs')]
+    stats = [('ARCHETYPE', archetype), ('PERSONALITY', personality), ('6-MONTH GOAL', goal)]
     col_w = (page_w - ML - MR) / 3
     for i, (label, val) in enumerate(stats):
         x = ML + i * col_w
@@ -323,6 +327,8 @@ class PDFRequest(BaseModel):
     hours: Optional[str] = '10-20'
     video_url: Optional[str] = 'https://quiz.the5th.consulting/video/v1'
     roadmap: str
+    archetype: Optional[str] = 'The Pioneer'
+    personality: Optional[str] = 'The Driver'
 
 TESTIMONIALS = [
     dict(
