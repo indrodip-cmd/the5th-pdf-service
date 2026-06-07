@@ -561,7 +561,7 @@ app.get('/health', (_req, res) => {
 })
 
 // ── Start ────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`The5th PDF Service v2 listening on port ${PORT}`)
 })
 
