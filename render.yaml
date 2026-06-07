@@ -5,5 +5,5 @@ services:
     buildCommand: bash render-build.sh
     startCommand: node server.js
     envVars:
-      - key: NODE_VERSION
-        value: "20"
+      - key: NODE_ENV
+        value: production
