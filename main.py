@@ -196,11 +196,18 @@ def draw_cover(canv, page_w, page_h, name, archetype, personality, stage, goal):
     # White logo centered
     logo_w, logo_h = 200, 56
     logo_x = (page_w - logo_w) / 2
-    try:
-        canv.drawImage(LOGO_WHITE, logo_x, y - logo_h,
-                       width=logo_w, height=logo_h,
-                       preserveAspectRatio=True, mask='auto')
-    except:
+    if os.path.exists(LOGO_WHITE):
+        try:
+            canv.drawImage(LOGO_WHITE, logo_x, y - logo_h,
+                           width=logo_w, height=logo_h,
+                           preserveAspectRatio=True, mask='auto')
+        except Exception as e:
+            print(f'WARNING: Failed to draw logo-white.png: {e}')
+            canv.setFillColor(WHITE)
+            canv.setFont('Helvetica-Bold', 14)
+            canv.drawCentredString(page_w / 2, y - 30, 'THE5TH CONSULTING')
+    else:
+        print(f'WARNING: logo-white.png not found at {LOGO_WHITE}')
         canv.setFillColor(WHITE)
         canv.setFont('Helvetica-Bold', 14)
         canv.drawCentredString(page_w / 2, y - 30, 'THE5TH CONSULTING')
@@ -287,11 +294,18 @@ def page_later(canv, doc):
     canv.saveState()
 
     # Header logo
-    try:
-        canv.drawImage(LOGO_COLOR, 40, PAGE_H - 52,
-                       width=90, height=25,
-                       preserveAspectRatio=True, mask='auto')
-    except:
+    if os.path.exists(LOGO_COLOR):
+        try:
+            canv.drawImage(LOGO_COLOR, 40, PAGE_H - 52,
+                           width=90, height=25,
+                           preserveAspectRatio=True, mask='auto')
+        except Exception as e:
+            print(f'WARNING: Failed to draw logo-color.png: {e}')
+            canv.setFillColor(PURPLE)
+            canv.setFont('Helvetica-Bold', 8)
+            canv.drawString(40, PAGE_H - 45, 'THE5TH CONSULTING')
+    else:
+        print(f'WARNING: logo-color.png not found at {LOGO_COLOR}')
         canv.setFillColor(PURPLE)
         canv.setFont('Helvetica-Bold', 8)
         canv.drawString(40, PAGE_H - 45, 'THE5TH CONSULTING')
@@ -1100,12 +1114,22 @@ async def generate_pdf(req: PDFRequest):
 
     def make_activation_cb():
         def cb(canv, doc):
-            draw_activation_page(canv, PAGE_W, PAGE_H)
+            try:
+                draw_activation_page(canv, PAGE_W, PAGE_H)
+            except Exception as e:
+                print(f'WARNING: draw_activation_page failed: {e}')
+                canv.setFillColor(PURPLE_DARK)
+                canv.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
         return cb
 
     def make_book_cb():
         def cb(canv, doc):
-            draw_book_page(canv, PAGE_W, PAGE_H)
+            try:
+                draw_book_page(canv, PAGE_W, PAGE_H)
+            except Exception as e:
+                print(f'WARNING: draw_book_page failed: {e}')
+                canv.setFillColor(GOLD_PALE)
+                canv.rect(0, 0, PAGE_W, PAGE_H, fill=1, stroke=0)
         return cb
 
     doc.addPageTemplates([
@@ -1131,9 +1155,8 @@ async def generate_pdf(req: PDFRequest):
         [NextPageTemplate('Archetype'), PageBreak()]
         + [NextPageTemplate('Content'), PageBreak()]
         + story
-        + [NextPageTemplate('Activation'), PageBreak()]
-        + [NextPageTemplate('Book'), PageBreak()]
-        + []
+        + [NextPageTemplate('Activation'), PageBreak(), Spacer(1, 1),
+           NextPageTemplate('Book'), PageBreak(), Spacer(1, 1)]
     )
 
     doc.build(full_story)
