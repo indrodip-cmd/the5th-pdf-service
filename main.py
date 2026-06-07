@@ -1101,13 +1101,11 @@ async def generate_pdf(req: PDFRequest):
     def make_activation_cb():
         def cb(canv, doc):
             draw_activation_page(canv, PAGE_W, PAGE_H)
-            page_later(canv, doc)
         return cb
 
     def make_book_cb():
         def cb(canv, doc):
             draw_book_page(canv, PAGE_W, PAGE_H)
-            page_later(canv, doc)
         return cb
 
     doc.addPageTemplates([
