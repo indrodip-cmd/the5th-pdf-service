@@ -9,7 +9,12 @@ const path = require('path')
 const app = express()
 app.use(express.json({ limit: '10mb' }))
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resend = null
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY)
+} else {
+  console.warn('WARNING: RESEND_API_KEY not set — emails will be skipped')
+}
 const FROM_EMAIL = process.env.PDF_FROM_EMAIL || 'Indrodip at The5th <Indrodip@10kroadmap.org>'
 const PORT = process.env.PORT || 3000
 
@@ -521,16 +526,20 @@ app.post('/generate-pdf', async (req, res) => {
 
     // Send email via Resend
     try {
-      await resend.emails.send({
-        from: FROM_EMAIL,
-        to: data.email,
-        subject: `${firstName}, your personalised blueprint is ready`,
-        html: generateEmailHTML(data.name),
-        attachments: [
-          { filename: 'your-growth-blueprint.pdf', content: Buffer.from(pdf).toString('base64') },
-        ],
-      })
-      console.log(`Email sent to ${data.email}`)
+      if (!resend) {
+        console.log('Email skipped: RESEND_API_KEY not configured')
+      } else {
+        await resend.emails.send({
+          from: FROM_EMAIL,
+          to: data.email,
+          subject: `${firstName}, your personalised blueprint is ready`,
+          html: generateEmailHTML(data.name),
+          attachments: [
+            { filename: 'your-growth-blueprint.pdf', content: Buffer.from(pdf).toString('base64') },
+          ],
+        })
+        console.log(`Email sent to ${data.email}`)
+      }
     } catch (emailErr) {
       console.error('Resend error (non-fatal):', emailErr.message)
     }
